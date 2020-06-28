@@ -99,7 +99,7 @@ class TRTModel(nn.Module):
             name = self._rename(self.profile_index, name)
             idx = self.engine.get_binding_index(name)
             dtype = torch_dtype_from_trt(self.engine.get_binding_dtype(idx))
-            bindings[idx % self.total_length] = inputs[i].to(dtype).data_ptr()
+            bindings[idx % self.total_length] = inputs[i].to(dtype).contiguous().data_ptr()
 
         for i, name in enumerate(self.output_names):
             name = self._rename(self.profile_index, name)
@@ -107,7 +107,7 @@ class TRTModel(nn.Module):
             shape = tuple(self.context.get_binding_shape(idx))
             dtype = torch_dtype_from_trt(self.engine.get_binding_dtype(idx))
             device = torch_device_from_trt(self.engine.get_location(idx))
-            output = torch.empty(size=shape, dtype=dtype, device=device)
+            output = torch.empty(size=shape, dtype=dtype, device=device).contiguous()
             outputs[i] = output
             bindings[idx % self.total_length] = output.data_ptr()
 
